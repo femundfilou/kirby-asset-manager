@@ -1,0 +1,15 @@
+{
+	"name": "kirby-asset-manager",
+	"version": "0.0.0",
+	"description": "Add CSS and JS per (block) snippet",
+	"scripts": {
+		"release": "release-it"
+	},
+	"devDependencies": {
+		"@release-it/bumper": "^5.1.0",
+		"@release-it/conventional-changelog": "^7.0.2",
+		"release-it": "^16.2.1"
+	},
+	"author": "Justus Kraft <justus@femundfilou.com>",
+	"license": "MIT"
+}
