@@ -66,12 +66,36 @@ class AssetManager
             throw new \InvalidArgumentException("Invalid asset type: {$type}");
         }
 
-        if (!in_array($filePath, $this->{$type}, true)) {
-            $this->{$type}[] = $type === 'css' ? css($filePath, $options) : js($filePath, $options);
-            $this->preload[] = $this->preload($type, $filePath, $options);
+        // Create a unique identifier for the asset
+        $uniqueId = md5($type . $filePath . json_encode($options));
+
+        // Check if the asset has already been added
+        if (!array_key_exists($uniqueId, $this->preload)) {
+            if ($type === 'css') {
+                $this->css[] = css($filePath, $options);
+            } elseif ($type === 'js') {
+                $this->js[] = js($filePath, $options);
+            }
+
+            // Add to preload array with unique identifier
+            $this->preload[$uniqueId] = $this->preload($type, $filePath, $options);
         }
     }
 
+    /**
+     * Generates the HTML tag for preloading a CSS or JS asset.
+     *
+     * This method prepares the attributes for a <link> tag to preload CSS or JS files.
+     * It supports specifying whether the resource should be treated as a 'style' or a 'modulepreload'.
+     * Additionally, it allows setting the 'crossorigin' attribute to manage CORS requests.
+     *
+     * @param string $type The type of asset to preload ('css' or 'js').
+     * @param string $filePath The URL of the asset to preload.
+     * @param array|string|null $options Additional options for preloading the asset.
+     *                                   Supports 'crossorigin' to specify the CORS settings for the asset.
+     *
+     * @return string The HTML <link> tag for preloading the specified asset.
+     */
     public function preload(string $type, string $filePath, $options)
     {
         $attributes = $type === 'css' ? [
@@ -86,7 +110,6 @@ class AssetManager
         ];
         return \Kirby\Toolkit\Html::tag('link', '', $attributes);
     }
-
 
     /**
      * Outputs the registered asset paths as a string.
