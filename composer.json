@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"homepage": "https://github.com/femundfilou/kirby-asset-manager",
 	"type": "kirby-plugin",
-	"version": "1.0.0-beta.0",
+	"version": "1.0.0-beta.1",
 	"authors": [
 		{
 			"name": "Justus Kraft",
