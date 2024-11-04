@@ -1,54 +1,48 @@
 <?php
 
+/**
+ * Asset Manager Plugin for Kirby CMS
+ * @remarks Based on work by Lukas Kleinschmidt
+ */
+
 F::loadClasses([
-    'femundfilou\\assetmanager\\assetmanager' => 'lib/AssetManager.php'
+	'femundfilou\\assetmanager\\assetmanager' => 'lib/AssetManager.php'
 ], __DIR__);
 
 use Femundfilou\AssetManager\AssetManager;
 
-/* Huge thanks to Lukas Kleinschmidt
- https://gist.github.com/lukaskleinschmidt/a8e9a76e6fce47430277553ca1332705
- */
-
 Kirby::plugin('femundfilou/asset-manager', [
-    'hooks' => [
-        'page.render:after' => function (string $contentType, string $html) {
-            if ($contentType === 'html') {
-                // Define the placeholders
-                $cssPlaceholder = '<!-- AssetManager CSS -->';
-                $jsPlaceholder = '<!-- AssetManager JS -->';
+	'hooks' => [
+		'page.render:after' => function (string $contentType, string $html): string {
+			if ($contentType !== 'html') {
+				return $html;
+			}
 
-                // Check for the CSS placeholder, if it's not found, use </head>
-                if (strpos($html, $cssPlaceholder) === false) {
-                    $html = preg_replace_callback('/<\/head>/', function ($matches) {
-                        return AssetManager::getInstance()->output('preload') . AssetManager::getInstance()->output('css') . $matches[0];
-                    }, $html);
-                } else {
-                    $html = str_replace($cssPlaceholder, AssetManager::getInstance()->output('preload') . AssetManager::getInstance()->output('css'), $html);
-                }
+			$manager = AssetManager::getInstance();
+			$preloadContent = $manager->output('preload');
+			$cssContent = $manager->output('css');
+			$jsContent = $manager->output('js');
 
-                // Check for the JS placeholder, if it's not found, use </body>
-                if (strpos($html, $jsPlaceholder) === false) {
-                    $html = preg_replace_callback('/<\/body>/', function ($matches) {
-                        return AssetManager::getInstance()->output('js') . $matches[0];
-                    }, $html);
-                } else {
-                    $html = str_replace($jsPlaceholder, AssetManager::getInstance()->output('js'), $html);
-                }
-            }
-            return $html;
-        },
-    ],
-    'components' => [
-        'snippet' => function ($kirby, $name, array $data = [], bool $slots = false) {
-            $data['assetManager'] = AssetManager::getInstance();
+			// Insert Preload
+			$html = str_contains($html, '<!-- AssetManager PRELOAD -->')
+				? str_replace('<!-- AssetManager PRELOAD -->', $preloadContent, $html)
+				: preg_replace('/(<head\b[^>]*>)/i', '$1' . PHP_EOL . $preloadContent, $html);
 
-            return $kirby->core()->components()['snippet'](
-                $kirby,
-                $name,
-                $data,
-                $slots,
-            );
-        }
-    ],
+			// Insert CSS
+			$html = str_contains($html, '<!-- AssetManager CSS -->')
+				? str_replace('<!-- AssetManager CSS -->', $cssContent, $html)
+				: preg_replace('/<\/head>/i', $cssContent . '$0', $html);
+
+			// Insert JS
+			return str_contains($html, '<!-- AssetManager JS -->')
+				? str_replace('<!-- AssetManager JS -->', $jsContent, $html)
+				: preg_replace('/<\/body>/i', $jsContent . '$0', $html);
+		}
+	],
+	'components' => [
+		'snippet' => function ($kirby, $name, array $data = [], bool $slots = false) {
+			$data['assetManager'] = AssetManager::getInstance();
+			return $kirby->core()->components()['snippet']($kirby, $name, $data, $slots);
+		}
+	]
 ]);

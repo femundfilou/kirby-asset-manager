@@ -36,15 +36,17 @@ This plugin exposes `$assetManager` to all snippets. With a simple command you c
 
 ### Output
 
-All added stylesheets will be appended right before `</head>`, all javascript right before `</body>`. 
-If you want more control over where the generated tags will be placed you can use these placeholders in your template which will be replaced with the corresponsing style and script tags.
+All added stylesheets will be appended right before `</head>`, all javascript right before `</body>`. Preload links will be appended right after `<head>`. 
+If you want more control over where the generated tags will be placed you can use these placeholders in your template which will be replaced with the corresponsing preload, style and script tags.
 
 ```html
+<head>
+	<!-- AssetManager PRELOAD -->
 ...
-<!-- AssetManager CSS -->
+	<!-- AssetManager CSS -->
 </head>
 ...
-<!-- AssetManager JS -->
+	<!-- AssetManager JS -->
 </body>
 
 ```
