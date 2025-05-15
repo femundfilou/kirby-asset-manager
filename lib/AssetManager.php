@@ -40,32 +40,28 @@ class AssetManager
 
 		$uniqueId = md5($type . $filePath . json_encode($options));
 
-		if (isset($this->preload[$uniqueId])) {
-			return;
-		}
-
+		// Add the asset to its respective collection
 		$this->{$type}[] = $type === 'css'
 			? css($filePath, $options)
 			: js($filePath, $options);
 
-		$this->preload[$uniqueId] = $this->generatePreloadTag($type, $filePath, $options);
+		// Only generate preload tags for JS files
+		if ($type === 'js') {
+			$this->preload[$uniqueId] = $this->generatePreloadTag($filePath, $options);
+		}
 	}
 
 	/**
-	 * Generates preload tag for asset
-	 * @remarks Supports modulepreload for JS and preload for CSS
+	 * Generates preload tag for JS assets
+	 * 
 	 */
-	private function generatePreloadTag(string $type, string $filePath, array|string|null $options): string
+	private function generatePreloadTag(string $filePath, array|string|null $options): string
 	{
 		$attributes = [
-			'rel' => $type === 'css' ? 'preload' : 'modulepreload',
+			'rel' => 'modulepreload',
 			'href' => $filePath,
 			'crossorigin' => $options['crossorigin'] ?? false,
 		];
-
-		if ($type === 'css') {
-			$attributes['as'] = 'style';
-		}
 
 		return \Kirby\Toolkit\Html::tag('link', '', $attributes);
 	}

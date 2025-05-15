@@ -12,6 +12,9 @@ F::loadClasses([
 use Femundfilou\AssetManager\AssetManager;
 
 Kirby::plugin('femundfilou/asset-manager', [
+	'options' => [
+		'preload' => true
+	],
 	'hooks' => [
 		'page.render:after' => function (string $contentType, string $html): string {
 			if ($contentType !== 'html') {
@@ -19,19 +22,21 @@ Kirby::plugin('femundfilou/asset-manager', [
 			}
 
 			$manager = AssetManager::getInstance();
-			$preloadContent = $manager->output('preload');
 			$cssContent = $manager->output('css');
 			$jsContent = $manager->output('js');
 
 			// Insert Preload
-			$html = str_contains($html, '<!-- AssetManager PRELOAD -->')
-				? str_replace('<!-- AssetManager PRELOAD -->', $preloadContent, $html)
-				: preg_replace('/(<head\b[^>]*>)/i', '$1' . PHP_EOL . $preloadContent, $html);
+			if (true === option('femundfilou.asset-manager.preload')) {
+				$preloadContent = $manager->output('preload');
+				$html = str_contains($html, '<!-- AssetManager PRELOAD -->')
+					? str_replace('<!-- AssetManager PRELOAD -->', $preloadContent, $html)
+					: preg_replace('/(<head\b[^>]*>)/i', '$1' . PHP_EOL . $preloadContent, $html);
+			}
 
 			// Insert CSS
 			$html = str_contains($html, '<!-- AssetManager CSS -->')
 				? str_replace('<!-- AssetManager CSS -->', $cssContent, $html)
-				: preg_replace('/<\/head>/i', $cssContent . '$0', $html);
+				: preg_replace('/(<head\b[^>]*>)/i', '$1' . PHP_EOL . $cssContent, $html);
 
 			// Insert JS
 			return str_contains($html, '<!-- AssetManager JS -->')

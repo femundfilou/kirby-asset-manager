@@ -79,6 +79,18 @@ export default defineConfig({
 });
 ```
 
+### Configuration
+
+You can configure the plugin in your `site/config/config.php` file.
+
+```php
+return [
+	'femundfilou.asset-manager' => [
+		'preload' => true // Disable or enable preloading of javascript assets
+	]
+];
+```
+
 ### Options
 
 You can apply the same options available in Kirby's [`css()`](https://getkirby.com/docs/reference/templates/helpers/css) and [`js()`](https://getkirby.com/docs/reference/templates/helpers/js) helper methods as a third argument.
